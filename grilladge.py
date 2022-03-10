@@ -171,7 +171,7 @@ class Grilladge():
 
     def _nodes_coor(self, discr=20, tr_discr=3):
         """
-        Aggregartes all nodes coordinates of girders
+        Aggregartes all nodes coordinates
         
         Parameters
         ----------

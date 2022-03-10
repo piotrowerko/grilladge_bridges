@@ -6,15 +6,15 @@ from PyNite import Visualization
 frame = FEModel3D()
 
 # Define the nodes
-frame.add_node('N1', 0, 0, 0)
+frame.add_node(1.0, 0, 0, 0)
 frame.add_node('N2', 0, 0, 15)
 frame.add_node('N3', 0, 0, 30)
-frame.add_node('N4', -10, 0, 30)
+frame.add_node('N4', -10, 0, 30.0)
 frame.add_node('N5', -10, 0, 15)
 frame.add_node('N6', -10, 0, 0)
 
 # Define the supports
-frame.def_support('N1', True, True, True, True, True, True)
+frame.def_support(1.0, True, True, True, True, True, True)
 frame.def_support('N3', True, True, True, True, True, True)
 frame.def_support('N4', True, True, True, True, True, True)
 frame.def_support('N6', True, True, True, True, True, True)
@@ -27,12 +27,12 @@ E = 35000000
 G = 16000000
 A = 1.0
 
-frame.add_member('M1', 'N1', 'N2', E, G, Iy, Iz, J, A)
+frame.add_member(1.0, 1.0, 'N2', E, G, Iy, Iz, J, A)
 frame.add_member('M2', 'N2', 'N3', E, G, Iy, Iz, J, A)
 frame.add_member('M3', 'N3', 'N4', E, G, Iy, Iz, J, A)
 frame.add_member('M4', 'N4', 'N5', E, G, Iy, Iz, J, A)
 frame.add_member('M5', 'N5', 'N6', E, G, Iy, Iz, J, A)
-frame.add_member('M6', 'N6', 'N1', E, G, Iy, Iz, J, A)
+frame.add_member('M6', 'N6', 1.0, E, G, Iy, Iz, J, A)
 frame.add_member('M7', 'N5', 'N2', E, G, Iy, Iz, J, A)
 
 # Add nodal loads
