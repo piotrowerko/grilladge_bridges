@@ -21,4 +21,5 @@
 # for i in range(0,3,1):
 #     print(i)
 
-print(18 % 7)
+__list = [1, 2]
+print(__list)
