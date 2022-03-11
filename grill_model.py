@@ -34,10 +34,10 @@ class GrillModel(FEModel3D):
     
     def add_nodes(self, no_to_disp=1.0):
         node_data = self.grilladge.add_name(self.grill_coors)
-        __list = [i for i in range(20)]
-        _b_list = [25, 30]
+        __list = [i for i in range(21)]
+        _b_list = [22, 24, 25, 27, 29]
         #__list.append(25, 30)
-        #__list += _b_list
+        __list += _b_list
         print(__list)
         for el in node_data[__list]:
             self.add_node(*el)
