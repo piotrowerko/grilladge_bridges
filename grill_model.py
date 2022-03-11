@@ -14,7 +14,7 @@ class GrillModel(FEModel3D):
                  canti_l=2.5,
                  skew=90,
                  discr=2,
-                 tr_discr=4):
+                 tr_discr=3):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
@@ -34,10 +34,10 @@ class GrillModel(FEModel3D):
     
     def add_nodes(self, no_to_disp=1.0):
         node_data = self.grilladge.add_name(self.grill_coors)
-        __list = [i for i in range(21)]
+        __list = [i for i in range(20)]
         _b_list = [25, 30]
         #__list.append(25, 30)
-        __list += _b_list
+        #__list += _b_list
         print(__list)
         for el in node_data[__list]:
             self.add_node(*el)
@@ -97,24 +97,24 @@ class GrillModel(FEModel3D):
         
         for j in range(self.grilladge.span_data[0] + 1):
             _last_mem_no = list(self.Members.keys())[-1]
-            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp+1].Name, 
+            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp + 1].Name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
                                 comp_only=False)
-            
+
             for i in range(self.tr_discr-2):
                 self.add_member((i+_last_mem_no+2), 
-                                self.Nodes[(_number + 1) * i + _pp + 1].Name, 
-                                self.Nodes[(_number + 1) * i + _pp + _number + 2].Name, 
-                                    E, G, Iy, Iz, J, A, 
-                                    auxNode=None,
-                                    tension_only=False, 
-                                    comp_only=False)
-            
+                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].Name, 
+                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
+                                E, G, Iy, Iz, J, A, 
+                                auxNode=None,
+                                tension_only=False, 
+                                comp_only=False)
+
             _last_mem_no = list(self.Members.keys())[-1]
             _curr_node = self.Members[_last_mem_no].j_node.Name
-            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[_number+2].Name, 
+            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 2].Name, 
                         E, G, Iy, Iz, J, A, 
                         auxNode=None,
                         tension_only=False, 
@@ -132,7 +132,7 @@ def main():
     wd185.add_girders()
     wd185.add_deck_trans()
     
-    wd185.add_member(100.0, 3.0, 8.0, 35000000, 16000000, 1, 1, 1, 1)
+    #wd185.add_member(100.0, 3.0, 8.0, 35000000, 16000000, 1, 1, 1, 1)
     #print(wd185.Members)
     #print(list(wd185.Members[9.0].i_node))
     print(wd185.add_cross_mebers())
