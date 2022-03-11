@@ -91,34 +91,33 @@ class GrillModel(FEModel3D):
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing cross members"""
+        _last_mem_no = list(self.Members.keys())[-1]
         _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
         _number = int(self.discr * self.grilladge.span_data[0])
         _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members
+
+        self.add_member((_last_mem_no+1), self.Nodes[1].Name, self.Nodes[_pp+1].Name, 
+                            E, G, Iy, Iz, J, A, 
+                            auxNode=None,
+                            tension_only=False, 
+                            comp_only=False)
         
-        for j in range(self.grilladge.span_data[0] + 1):
-            _last_mem_no = list(self.Members.keys())[-1]
-            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp+1].Name, 
+        for i in range(self.tr_discr-2):
+            self.add_member((i+_last_mem_no+2), 
+                            self.Nodes[(_number + 1) * i + _pp + 1].Name, 
+                            self.Nodes[(_number + 1) * i + _pp + _number + 2].Name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
                                 comp_only=False)
-            
-            for i in range(self.tr_discr-2):
-                self.add_member((i+_last_mem_no+2), 
-                                self.Nodes[(_number + 1) * i + _pp + 1].Name, 
-                                self.Nodes[(_number + 1) * i + _pp + _number + 2].Name, 
-                                    E, G, Iy, Iz, J, A, 
-                                    auxNode=None,
-                                    tension_only=False, 
-                                    comp_only=False)
-            
-            _last_mem_no = list(self.Members.keys())[-1]
-            _curr_node = self.Members[_last_mem_no].j_node.Name
-            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[_number+2].Name, 
-                        E, G, Iy, Iz, J, A, 
-                        auxNode=None,
-                        tension_only=False, 
-                        comp_only=False)
+        
+        _last_mem_no = list(self.Members.keys())[-1]
+        _curr_node = self.Members[_last_mem_no].j_node.Name
+        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[_number+2].Name, 
+                    E, G, Iy, Iz, J, A, 
+                    auxNode=None,
+                    tension_only=False, 
+                    comp_only=False)
         return _last_mem_no, _pp
 
 def main():
