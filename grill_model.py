@@ -35,7 +35,7 @@ class GrillModel(FEModel3D):
     def add_nodes(self, no_to_disp=1.0):
         node_data = self.grilladge.add_name(self.grill_coors)
         __list = [i for i in range(21)]
-        _b_list = [25, 30]
+        _b_list = [22, 24, 25, 27, 29, 30, 32, 34]
         #__list.append(25, 30)
         __list += _b_list
         print(__list)
@@ -87,7 +87,7 @@ class GrillModel(FEModel3D):
             # add FE members representing bridge deck in trans. direction:
         return self.Members
     
-    def add_cross_mebers(self, E=35000000, G=16000000, 
+    def add_cross_members(self, E=35000000, G=16000000, 
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing cross members"""
@@ -102,45 +102,47 @@ class GrillModel(FEModel3D):
                             tension_only=False, 
                             comp_only=False)
         
-        for i in range(self.tr_discr-2):
-            self.add_member((i+_last_mem_no+2), 
-                            self.Nodes[(_number + 1) * i + _pp + 1].Name, 
-                            self.Nodes[(_number + 1) * i + _pp + _number + 2].Name, 
+        for j in range(self.grilladge.span_data[0] + 1):
+            _last_mem_no = list(self.Members.keys())[-1]
+            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp + 1].Name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
                                 comp_only=False)
-        
-        _last_mem_no = list(self.Members.keys())[-1]
-        _curr_node = self.Members[_last_mem_no].j_node.Name
-        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[_number+2].Name, 
-                    E, G, Iy, Iz, J, A, 
-                    auxNode=None,
-                    tension_only=False, 
-                    comp_only=False)
+
+            for i in range(self.tr_discr-2):
+                self.add_member((i+_last_mem_no+2), 
+                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].Name, 
+                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
+                                E, G, Iy, Iz, J, A, 
+                                auxNode=None,
+                                tension_only=False, 
+                                comp_only=False)
+
+            _last_mem_no = list(self.Members.keys())[-1]
+            _curr_node = self.Members[_last_mem_no].j_node.Name
+            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 2].Name, 
+                        E, G, Iy, Iz, J, A, 
+                        auxNode=None,
+                        tension_only=False, 
+                        comp_only=False)
         return _last_mem_no, _pp
 
 def main():
     wd185 = GrillModel('wd_185')
-    # print(wd185._z_coors_of_cantitip(discr=10, edge=2))
-    # print(wd185._z_coors_in_g(discr=10, gird_no=2))
-    # print(wd185._x_coors_in_g1(discr=10))
-    # print(wd185._x_coors_in_g(discr=10, gird_no=2))
-    #print(wd185.grill_coors)
+
     wd185.add_nodes()
     wd185.add_girders()
     wd185.add_deck_trans()
-    
-    wd185.add_member(100.0, 3.0, 8.0, 35000000, 16000000, 1, 1, 1, 1)
-    #print(wd185.Members)
-    #print(list(wd185.Members[9.0].i_node))
-    print(wd185.add_cross_mebers())
+
+    print(wd185.add_cross_members())
     
     # Define the supports
-    wd185.def_support(1.0, True, True, True, True, True, True)
-    wd185.def_support(5.0, True, True, True, True, True, True)
-    wd185.def_support(6.0, True, True, True, True, True, True)
-    wd185.def_support(10.0, True, True, True, True, True, True)
+    
+    wd185.def_support(1.0, *(6 * [True]))
+    wd185.def_support(5.0, *(6 * [True]))
+    wd185.def_support(6.0, *(6 * [True]))
+    wd185.def_support(10.0, *(6 * [True]))
 
     # Add nodal loads
     wd185.add_node_load(2.0, 'FY', -400)
