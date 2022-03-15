@@ -14,7 +14,7 @@ class GrillModel(FEModel3D):
                  canti_l=2.5,
                  skew=90,
                  discr=2,
-                 tr_discr=3):
+                 tr_discr=4):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
@@ -35,7 +35,7 @@ class GrillModel(FEModel3D):
     def add_nodes(self, no_to_disp=1.0):
         node_data = self.grilladge.add_name(self.grill_coors)
         __list = [i for i in range(21)]
-        _b_list = [22, 24, 25, 27, 29]
+        _b_list = [22, 24, 25, 27, 29, 30, 32, 34]
         #__list.append(25, 30)
         __list += _b_list
         print(__list)
@@ -87,7 +87,7 @@ class GrillModel(FEModel3D):
             # add FE members representing bridge deck in trans. direction:
         return self.Members
     
-    def add_cross_mebers(self, E=35000000, G=16000000, 
+    def add_cross_members(self, E=35000000, G=16000000, 
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing cross members"""
@@ -123,25 +123,19 @@ class GrillModel(FEModel3D):
 
 def main():
     wd185 = GrillModel('wd_185')
-    # print(wd185._z_coors_of_cantitip(discr=10, edge=2))
-    # print(wd185._z_coors_in_g(discr=10, gird_no=2))
-    # print(wd185._x_coors_in_g1(discr=10))
-    # print(wd185._x_coors_in_g(discr=10, gird_no=2))
-    #print(wd185.grill_coors)
+
     wd185.add_nodes()
     wd185.add_girders()
     wd185.add_deck_trans()
-    
-    #wd185.add_member(100.0, 3.0, 8.0, 35000000, 16000000, 1, 1, 1, 1)
-    #print(wd185.Members)
-    #print(list(wd185.Members[9.0].i_node))
-    print(wd185.add_cross_mebers())
+
+    print(wd185.add_cross_members())
     
     # Define the supports
-    wd185.def_support(1.0, True, True, True, True, True, True)
-    wd185.def_support(5.0, True, True, True, True, True, True)
-    wd185.def_support(6.0, True, True, True, True, True, True)
-    wd185.def_support(10.0, True, True, True, True, True, True)
+    
+    wd185.def_support(1.0, *(6 * [True]))
+    wd185.def_support(5.0, *(6 * [True]))
+    wd185.def_support(6.0, *(6 * [True]))
+    wd185.def_support(10.0, *(6 * [True]))
 
     # Add nodal loads
     wd185.add_node_load(2.0, 'FY', -400)

@@ -21,5 +21,5 @@
 # for i in range(0,3,1):
 #     print(i)
 
-__list = [1, 2]
+__list = 6* [True]
 print(__list)
