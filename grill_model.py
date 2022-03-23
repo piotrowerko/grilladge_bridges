@@ -9,12 +9,12 @@ class GrillModel(FEModel3D):
     def __init__(self,
                  name, 
                  no_of_beams=2, 
-                 beam_spacing=8, 
-                 span_data=(3, 30, 30, 30),
+                 beam_spacing=4, 
+                 span_data=(2, 30, 30),
                  canti_l=2.5,
-                 skew=45,
+                 skew=-60,
                  discr=10,
-                 tr_discr=4):
+                 tr_discr=3):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
@@ -239,15 +239,15 @@ def main():
     # Define the supports
     
     wd185.def_support(1.0, *(6 * [True]))
-    wd185.def_support(5.0, *(6 * [True]))
-    wd185.def_support(6.0, *(6 * [True]))
-    wd185.def_support(10.0, *(6 * [True]))
+    wd185.def_support(18.0, *(6 * [True]))
+    # wd185.def_support(21.0, *(6 * [True]))
+    # wd185.def_support(42.0, *(6 * [True]))
 
     # Add nodal loads
-    wd185.add_node_load(2.0, 'FY', -400)
+    wd185.add_node_load(16.0, 'FY', -400)
     
     # Analyze the model
-    wd185.analyze(check_statics=False)
+    wd185.analyze(check_statics=True)
     
     # Render the deformed shape
     Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=True, deformed_scale=200, render_loads=True)
