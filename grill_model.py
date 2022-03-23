@@ -8,8 +8,8 @@ class GrillModel(FEModel3D):
     build on basis of instance of Grilladge class instance from grilladge module"""
     def __init__(self,
                  name, 
-                 no_of_beams=2, 
-                 beam_spacing=4, 
+                 no_of_beams=5, 
+                 beam_spacing=5, 
                  span_data=(2, 30, 30),
                  canti_l=2.5,
                  skew=-60,
@@ -69,7 +69,7 @@ class GrillModel(FEModel3D):
                 Iy=0.1, Iz=0.1, J=0.1, A=0.1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing bridge cantilevels in trans. direction"""
-        _jj = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + 2 
+        _jj = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + no_of_beams 
         _number = int(self.discr * self.grilladge.span_data[0] + 1) # no of cantilevel FE on one side + 1
         _kk = (self.no_of_beams - 1) * (_number) + 1  # number of first node in last girder
         for i in range(0, _number, 1):
@@ -80,81 +80,14 @@ class GrillModel(FEModel3D):
                             tension_only=False, 
                             comp_only=False)
             # adding cantilevel FE - upper egde:
-            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].Name, self.Nodes[((_jj+_kk+i)*1.0)].Name, 
+            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].Name, self.Nodes[((_jj+_number+1+i)*1.0)].Name, 
                             E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
                             comp_only=False)
         return self.Members
-    
-    def add_cross_members(self, E=35000000, G=16000000, 
-                Iy=1, Iz=1, J=1, A=1, auxNode=None,
-                tension_only=False, comp_only=False):
-        """adds FE members representing cross members"""
-        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
-        _number = int(self.discr * self.grilladge.span_data[0])
-        _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members
-        
-        for j in range(self.grilladge.span_data[0] + 1):
-            _last_mem_no = list(self.Members.keys())[-1]
-            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp + 1].Name, 
-                                E, G, Iy, Iz, J, A, 
-                                auxNode=None,
-                                tension_only=False, 
-                                comp_only=False)
 
-            for i in range(self.tr_discr-2):
-                self.add_member((i+_last_mem_no+2), 
-                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].Name, 
-                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
-                                E, G, Iy, Iz, J, A, 
-                                auxNode=None,
-                                tension_only=False, 
-                                comp_only=False)
 
-            _last_mem_no = list(self.Members.keys())[-1]
-            _curr_node = self.Members[_last_mem_no].j_node.Name
-            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 2].Name, 
-                        E, G, Iy, Iz, J, A, 
-                        auxNode=None,
-                        tension_only=False, 
-                        comp_only=False)
-        return _last_mem_no, _pp
-
-    def add_cross_members(self, E=35000000, G=16000000, 
-                Iy=1, Iz=1, J=1, A=1, auxNode=None,
-                tension_only=False, comp_only=False):
-        """adds FE members representing cross members"""
-        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
-        _number = int(self.discr * self.grilladge.span_data[0])
-        _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members
-        
-        for j in range(self.grilladge.span_data[0] + 1):
-            _last_mem_no = list(self.Members.keys())[-1]
-            self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp + 1].Name, 
-                                E, G, Iy, Iz, J, A, 
-                                auxNode=None,
-                                tension_only=False, 
-                                comp_only=False)
-
-            for i in range(self.tr_discr-2):
-                self.add_member((i+_last_mem_no+2), 
-                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].Name, 
-                                self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
-                                E, G, Iy, Iz, J, A, 
-                                auxNode=None,
-                                tension_only=False, 
-                                comp_only=False)
-
-            _last_mem_no = list(self.Members.keys())[-1]
-            _curr_node = self.Members[_last_mem_no].j_node.Name
-            self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 2].Name, 
-                        E, G, Iy, Iz, J, A, 
-                        auxNode=None,
-                        tension_only=False, 
-                        comp_only=False)
-        return _last_mem_no, _pp
-    
     def add_cross_members_(self, E=35000000, G=16000000, 
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False, deck=False):
@@ -175,19 +108,20 @@ class GrillModel(FEModel3D):
             for k in range(_sec_loop):
                 _last_mem_no = list(self.Members.keys())[-1]
                 if deck == True:
-                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 2 + k].Name, self.Nodes[j * self.discr + _pp + 2 + k].Name, 
+                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 2 + k].Name, 
+                                        self.Nodes[j * self.discr + _pp + 2 + k].Name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
                                         comp_only=False)
                 else:
-                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, self.Nodes[j * self.discr + _pp + 1].Name, 
+                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, 
+                                        self.Nodes[j * self.discr + _pp + 1].Name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
                                         comp_only=False)
 
-            #for k in range(_sec_loop):
                 for i in range(self.tr_discr-2):
                     if deck == True:
                         if i == 0:
@@ -225,6 +159,78 @@ class GrillModel(FEModel3D):
                                 comp_only=False)
         return _last_mem_no, _pp
 
+    def add_cross_members_new_(self, E=35000000, G=16000000, 
+                Iy=1, Iz=1, J=1, A=1, auxNode=None,
+                tension_only=False, comp_only=False, deck=False):
+        """adds FE members representing cross members or bridge deck in trans. dir."""
+        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
+        _number = int(self.discr * self.grilladge.span_data[0])
+        _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members + cantiENDs nodes
+        _qq = (_number + 1) * (self.tr_discr - 1)# liczba węzłów wewnętrznych pomiędzy belkami
+        
+        # adding _loop variables for creation of additional trans. bars repr. deck in trans. dir.:
+        if deck == True:
+            _first_loop = self.grilladge.span_data[0]  # eq. to number of spans
+            _sec_loop = int(self.discr) - 1  # eq. to number of cross lines of deck cross bars in each span
+        else:
+            _first_loop = self.grilladge.span_data[0] + 1  # eq. to number of support cross members
+            _sec_loop = 1
+        
+        for a in range(0, self.no_of_beams - 1, 1):
+            for j in range(_first_loop):
+                for k in range(_sec_loop):
+                    _last_mem_no = list(self.Members.keys())[-1]
+                    if deck == True:
+                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 2 + k].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + _pp + 2 + k].Name, 
+                                            E, G, Iy, Iz, J, A, 
+                                            auxNode=None,
+                                            tension_only=False, 
+                                            comp_only=False)
+                    else:
+                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 1].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + _pp + 1].Name, 
+                                            E, G, Iy, Iz, J, A, 
+                                            auxNode=None,
+                                            tension_only=False, 
+                                            comp_only=False)
+
+                    for i in range(self.tr_discr-2):
+                        if deck == True:
+                            if i == 0:
+                                _last_mem_no = list(self.Members.keys())[-1]
+                            self.add_member((i+_last_mem_no+1), 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 2 + k].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 3 + k].Name, 
+                                            E, G, Iy, Iz, J, A, 
+                                            auxNode=None,
+                                            tension_only=False, 
+                                            comp_only=False)
+                        else:
+                            self.add_member((i+_last_mem_no+2), 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 1].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
+                                            E, G, Iy, Iz, J, A, 
+                                            auxNode=None,
+                                            tension_only=False, 
+                                            comp_only=False)
+
+
+                    _last_mem_no = list(self.Members.keys())[-1]
+                    _curr_node = self.Members[_last_mem_no].j_node.Name
+                    if deck == True:
+                        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[a * (_number + 1) + j * self.discr + _number + 3 + k].Name, 
+                                    E, G, Iy, Iz, J, A, 
+                                    auxNode=None,
+                                    tension_only=False, 
+                                    comp_only=False)
+                    else:
+                        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[a * (_number + 1) + j * self.discr + _number + 2].Name, 
+                                    E, G, Iy, Iz, J, A, 
+                                    auxNode=None,
+                                    tension_only=False, 
+                                    comp_only=False)
+        return _last_mem_no, _pp
 
 def main():
     wd185 = GrillModel('wd_185')
@@ -233,13 +239,13 @@ def main():
     wd185.add_girders()
     wd185.add_deck_trans_can()
 
-    print(wd185.add_cross_members_(deck=False))
-    print(wd185.add_cross_members_(deck=True))
+    print(wd185.add_cross_members_new_(deck=False))
+    print(wd185.add_cross_members_new_(deck=True))
     
-    # Define the supports
+    # # Define the supports
     
-    wd185.def_support(1.0, *(6 * [True]))
-    wd185.def_support(18.0, *(6 * [True]))
+    # wd185.def_support(1.0, *(6 * [True]))
+    # wd185.def_support(18.0, *(6 * [True]))
     # wd185.def_support(21.0, *(6 * [True]))
     # wd185.def_support(42.0, *(6 * [True]))
 
@@ -247,10 +253,10 @@ def main():
     wd185.add_node_load(16.0, 'FY', -400)
     
     # Analyze the model
-    wd185.analyze(check_statics=True)
+    #wd185.analyze(check_statics=True)
     
     # Render the deformed shape
-    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=True, deformed_scale=200, render_loads=True)
+    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=False, deformed_scale=200, render_loads=False)
     
 if __name__ == '__main__':
     main()

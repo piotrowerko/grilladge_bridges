@@ -205,7 +205,7 @@ class Grilladge():
         x_dist_arr_cr = np.array([])
         for i in range(self.no_of_beams-1):
             for j in range(tr_discr-1):
-                x_dist_arr_cr = np.append(x_dist_arr_cr, [(j+1) * self.beam_spacing / tr_discr])
+                x_dist_arr_cr = np.append(x_dist_arr_cr, [(j+1) * self.beam_spacing / tr_discr + i * self.beam_spacing]) #
         z_coors_cr, x_coors_cr, y_coors_cr = self._gen_coor_array(discr, x_dist_arr_cr)
         all_nodes_coor_cr = np.stack((z_coors_cr, x_coors_cr, y_coors_cr))
         return all_nodes_coor_g, all_nodes_coor_c, all_nodes_coor_cr
@@ -239,8 +239,8 @@ class Grilladge():
 
 
 def main():
-    wd185 = Grilladge(no_of_beams=2, beam_spacing=8, span_data=(2, 35, 30), skew=90)
-    ppp = wd185.grilladge_nodes_c(discr=2, tr_discr=3, coors_like_pynite='y')
+    wd185 = Grilladge(no_of_beams=3, beam_spacing=8, span_data=(2, 30, 30), skew=90)
+    ppp = wd185.grilladge_nodes_c(discr=2, tr_discr=2, coors_like_pynite='y')
     print(wd185.add_name(ppp))
     
 if __name__ == '__main__':
