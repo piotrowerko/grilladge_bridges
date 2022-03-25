@@ -8,12 +8,12 @@ class GrillModel(FEModel3D):
     build on basis of instance of Grilladge class instance from grilladge module"""
     def __init__(self,
                  name, 
-                 no_of_beams=5, 
-                 beam_spacing=5, 
-                 span_data=(2, 30, 30),
+                 no_of_beams=3, 
+                 beam_spacing=8, 
+                 span_data=(3, 30, 30, 30),
                  canti_l=2.5,
-                 skew=-60,
-                 discr=10,
+                 skew=90,
+                 discr=3,
                  tr_discr=3):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
@@ -232,6 +232,30 @@ class GrillModel(FEModel3D):
                                     comp_only=False)
         return _last_mem_no, _pp
 
+    def add_gird_suppports(self):
+        """adds node supperts at intersections of girder and support axes"""
+        int(self.discr) #* self.grilladge.span_data[0])
+        #'1 3 5 6 8 10'
+        # compute number of intersections:
+        num_of_in = self.no_of_beams * (self.grilladge.span_data[0] + 1)
+        sup_node_number = 1.0
+        j = 0
+        for i in range(num_of_in):
+            self.def_support(sup_node_number, 
+                             *(3 * [True]), 
+                             *(3 * [False]))
+            if (j) < self.grilladge.span_data[0]:
+                print(j)
+                sup_node_number += self.discr
+                j += 1
+            else:
+                sup_node_number += 1
+                j = 0
+        
+        # self.def_support(1.0, *(3 * [True]), *(3 * [False]))
+        # self.def_support(10.0, *(3 * [True]), *(3 * [False]))
+        # self.def_support(5.0, *(3 * [True]), *(3 * [False]))
+
 def main():
     wd185 = GrillModel('wd_185')
 
@@ -245,18 +269,19 @@ def main():
     # # Define the supports
     
     # wd185.def_support(1.0, *(6 * [True]))
-    # wd185.def_support(18.0, *(6 * [True]))
+    # wd185.def_support(22.0, *(6 * [True]))
     # wd185.def_support(21.0, *(6 * [True]))
     # wd185.def_support(42.0, *(6 * [True]))
+    wd185.add_gird_suppports()
 
     # Add nodal loads
-    wd185.add_node_load(16.0, 'FY', -400)
+    wd185.add_node_load(5.0, 'FY', -400)
     
     # Analyze the model
-    #wd185.analyze(check_statics=True)
+    wd185.analyze(check_statics=True)
     
     # Render the deformed shape
-    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=False, deformed_scale=200, render_loads=False)
+    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=True, deformed_scale=200, render_loads=True)
     
 if __name__ == '__main__':
     main()
