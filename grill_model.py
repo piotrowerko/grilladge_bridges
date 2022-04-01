@@ -3,17 +3,22 @@ from PyNite.FEModel3D import FEModel3D
 from grilladge import Grilladge
 from PyNite import Visualization
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
 class GrillModel(FEModel3D):
     """Instance of this class is a Grilladge FE model,
     build on basis of instance of Grilladge class instance from grilladge module"""
     def __init__(self,
                  name, 
-                 no_of_beams=3, 
+                 no_of_beams=2, 
                  beam_spacing=8, 
-                 span_data=(3, 30, 30, 30),
+                 span_data=(2, 30, 30),
                  canti_l=2.5,
-                 skew=90,
-                 discr=3,
+                 skew=60,
+                 discr=10,
                  tr_discr=3):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
@@ -34,16 +39,11 @@ class GrillModel(FEModel3D):
     
     def add_nodes(self, no_to_disp=1.0):
         node_data = self.grilladge.add_name(self.grill_coors)
-        # __list = [i for i in range(21)]
-        # _b_list = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
-        # #__list.append(25, 30)
-        # __list += _b_list
-        # print(__list)
         __list = [i for i in range(len(node_data))]
         for el in node_data[__list]:
             self.add_node(*el)
         #return self.Nodes[no_to_disp].Name, self.Nodes[no_to_disp].X, self.Nodes[no_to_disp].Y, self.Nodes[no_to_disp].Z
-        return list(self.Nodes[no_to_disp])  # this will only run when Node 3D class in pynite is changed
+        return node_data, list(self.Nodes[no_to_disp])  # this will only run when Node 3D class in pynite is changed
         #return type(self.Nodes)
     #  Unpacking Dictionaries With the ** Operator
     # https://stackabuse.com/unpacking-in-python-beyond-parallel-assignment/
@@ -74,13 +74,15 @@ class GrillModel(FEModel3D):
         _kk = (self.no_of_beams - 1) * (_number) + 1  # number of first node in last girder
         for i in range(0, _number, 1):
             # adding cantilevel FE - bottom egde:
-            self.add_member((_jj+i-1), self.Nodes[(i+1)*1.0].Name, self.Nodes[((_jj+i+1)*1.0)].Name, 
+            self.add_member((_jj+i-1), self.Nodes[(i+1)*1.0].Name, 
+                            self.Nodes[((_jj+i+1)*1.0)].Name, 
                             E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
                             comp_only=False)
             # adding cantilevel FE - upper egde:
-            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].Name, self.Nodes[((_jj+_number+1+i)*1.0)].Name, 
+            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].Name, 
+                            self.Nodes[((_jj+_number+1+i)*1.0)].Name, 
                             E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
@@ -146,13 +148,15 @@ class GrillModel(FEModel3D):
                 _last_mem_no = list(self.Members.keys())[-1]
                 _curr_node = self.Members[_last_mem_no].j_node.Name
                 if deck == True:
-                    self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 3 + k].Name, 
+                    self.add_member((_last_mem_no+1), _curr_node, 
+                                    self.Nodes[j * self.discr + _number + 3 + k].Name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
                                 comp_only=False)
                 else:
-                    self.add_member((_last_mem_no+1), _curr_node, self.Nodes[j * self.discr + _number + 2].Name, 
+                    self.add_member((_last_mem_no+1), _curr_node, 
+                                    self.Nodes[j * self.discr + _number + 2].Name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
@@ -219,13 +223,15 @@ class GrillModel(FEModel3D):
                     _last_mem_no = list(self.Members.keys())[-1]
                     _curr_node = self.Members[_last_mem_no].j_node.Name
                     if deck == True:
-                        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[a * (_number + 1) + j * self.discr + _number + 3 + k].Name, 
+                        self.add_member((_last_mem_no+1), _curr_node, 
+                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 3 + k].Name, 
                                     E, G, Iy, Iz, J, A, 
                                     auxNode=None,
                                     tension_only=False, 
                                     comp_only=False)
                     else:
-                        self.add_member((_last_mem_no+1), _curr_node, self.Nodes[a * (_number + 1) + j * self.discr + _number + 2].Name, 
+                        self.add_member((_last_mem_no+1), _curr_node, 
+                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 2].Name, 
                                     E, G, Iy, Iz, J, A, 
                                     auxNode=None,
                                     tension_only=False, 
@@ -245,43 +251,156 @@ class GrillModel(FEModel3D):
                              *(3 * [True]), 
                              *(3 * [False]))
             if (j) < self.grilladge.span_data[0]:
-                print(j)
                 sup_node_number += self.discr
                 j += 1
             else:
                 sup_node_number += 1
                 j = 0
-        
-        # self.def_support(1.0, *(3 * [True]), *(3 * [False]))
-        # self.def_support(10.0, *(3 * [True]), *(3 * [False]))
-        # self.def_support(5.0, *(3 * [True]), *(3 * [False]))
+    
+    def load_with_unit_load(self, node):
+        "adds loads and results from node unit loads"
+        node_disp_vert = np.array([])
+        for key in self.Nodes.keys():
+            if key == None:
+                pass
+            else:
+                self.add_node_load(key, 'FY', -1000)
+                self.analyze(check_statics=False)
+                node_disp_vert = np.append(node_disp_vert, [self.Nodes[key].DY['Combo 1']])
+        return node_disp_vert
+
+    def _load_with_unit_load(self, node):
+        "adds unit loads and and creates factors dictionary"
+        _factors = {}
+        for key in self.Nodes.keys():
+            if key == None:
+                pass
+            else:
+                self.add_node_load(key, 'FY', -1000, case=key)
+                # creating dictionary with load factors
+                _factors[key] = 1.0
+        return _factors
+                
+    
+    def aggregate_displacements(self, node):
+        "computes data for influance map in given node"
+        node_disp_vert = {}
+        _factors = self._load_with_unit_load(node)
+        for key in self.Nodes.keys():
+            if key == None:
+                pass
+            else:
+                self.add_load_combo(key, factors={key:1.0})
+        self.analyze(check_statics=False)
+        #node_disp_vert = np.append(node_disp_vert, [self.Nodes[key].DY['inf_data']])
+        for key in self.Nodes.keys():
+            if key == None:
+                pass
+            else:
+                node_disp_vert[key] = self.Nodes[node].DY[key]
+        return node_disp_vert
+    
+    def gen_np_data_for_plot(self, node_data, analysed_data):
+        """returns np array of influance 3d function discrete representation
+        for visaulisations"""
+        _infl_data = node_data
+        _vals = np.array([val for val in analysed_data.values()])
+        v_vals = np.vstack(_vals)
+        infl_data = np.append(_infl_data, v_vals, axis=1)
+        return infl_data
+
+    def print_3d_plot(self, data):
+        """plots influance scatter plot of given data"""
+        longi_cor = data[:, 3]  # "z" in pynite; "x" in arsap
+        trans_cor = data[:, 1]  # "x" in pynite; "y" in arsap
+        infl_data = data[:, 4]
+        name_data = data[:, 0]
+        fig = plt.figure()
+        #ax = fig.gca(projection='3d')
+        ax = fig.add_subplot(111, projection='3d')
+        # X = np.arange(0, iy, 1)
+        # Y = np.arange(0, ix, 1)
+        #longi_cor, trans_cor = np.meshgrid(longi_cor, trans_cor)
+
+        #surf = ax.plot_surface(longi_cor, trans_cor, infl_data, cmap=cm.coolwarm,
+        #                       linewidth=0, antialiased=False)
+        # Customize the z axis.
+        # ax.set_zlim(4, 12)
+        # ax.zaxis.set_major_locator(LinearLocator(10))
+        # ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        #ax.scatter(longi_cor, trans_cor, infl_data, c='y', marker='o')
+        surf = ax.plot_trisurf(longi_cor, trans_cor, infl_data, cmap=cm.jet, linewidth=0)
+        fig.colorbar(surf)
+        ax.view_init(30, 20)
+        plt.show()
+
+# from mpl_toolkits.mplot3d import Axes3D
+# import matplotlib.pyplot as plt
+# from matplotlib import cm
+# from matplotlib.ticker import LinearLocator, FormatStrFormatter
+# import numpy as np
+
+
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# X = np.arange(0, iy, 1)
+# Y = np.arange(0, ix, 1)
+# X, Y = np.meshgrid(X, Y)
+
+# Z=P
+# surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+#                        linewidth=0, antialiased=False)
+# # Customize the z axis.
+# ax.set_zlim(4, 12)
+# ax.zaxis.set_major_locator(LinearLocator(10))
+# ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+# ax.view_init(75, 20)
+# plt.show()
+
+# # Add nodal loads
+# frame.add_node_load('N2', 'FY', -400, case=1.0)
+# frame.add_node_load('N5', 'FY', -400, case=1.0)
+
+# frame.add_load_combo('ppp', factors={1.0:1.0})
+
+# # Analyze the model
+# frame.analyze(check_statics=True)
+
+# # Render the deformed shape
+# Visualization.render_model(frame, deformed_shape=True, deformed_scale=200, render_loads=True, combo_name='ppp')
 
 def main():
     wd185 = GrillModel('wd_185')
 
-    wd185.add_nodes()
+    node_data = wd185.add_nodes()[0]
     wd185.add_girders()
     wd185.add_deck_trans_can()
 
-    print(wd185.add_cross_members_new_(deck=False))
-    print(wd185.add_cross_members_new_(deck=True))
+    wd185.add_cross_members_new_(deck=False)
+    wd185.add_cross_members_new_(deck=True)
     
     # # Define the supports
-    
-    # wd185.def_support(1.0, *(6 * [True]))
-    # wd185.def_support(22.0, *(6 * [True]))
-    # wd185.def_support(21.0, *(6 * [True]))
     # wd185.def_support(42.0, *(6 * [True]))
     wd185.add_gird_suppports()
 
     # Add nodal loads
-    wd185.add_node_load(5.0, 'FY', -400)
+    #wd185.add_node_load(2.0, 'FY', -400)
     
     # Analyze the model
-    wd185.analyze(check_statics=True)
+    #wd185.analyze(check_statics=True)
     
     # Render the deformed shape
-    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=True, deformed_scale=200, render_loads=True)
+    Visualization.render_model(wd185, annotation_size=0.2, deformed_shape=False, deformed_scale=200, render_loads=False)
     
+    # print('N1 displacement in Y =', wd185.Nodes[2.0].DY)
+    
+    # print(wd185.Nodes[1.0].Name)
+    
+    node = 5.0
+    wd185._load_with_unit_load(node)
+    displ_data = wd185.aggregate_displacements(node)
+    data = wd185.gen_np_data_for_plot(node_data, displ_data)
+    wd185.print_3d_plot(data)
+            
 if __name__ == '__main__':
     main()
