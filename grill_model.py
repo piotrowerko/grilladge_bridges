@@ -19,7 +19,8 @@ class GrillModel(FEModel3D):
                  canti_l=2.5,
                  skew=60,
                  discr=10,
-                 tr_discr=3):
+                 tr_discr=3,
+                 onlybeam=False):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
@@ -27,7 +28,8 @@ class GrillModel(FEModel3D):
                                    beam_spacing, 
                                    span_data,
                                    canti_l,
-                                   skew)
+                                   skew,
+                                   onlybeam)
         self.grill_coors = self.grilladge.grilladge_nodes_c(discr, 
                                                          tr_discr)
         self.discr = discr
@@ -37,7 +39,7 @@ class GrillModel(FEModel3D):
     def __str__(self):
         return f'{self.name}'
     
-    def add_nodes(self, no_to_disp=1.0):
+    def add_nodes(self, no_to_disp=1.0, onlybeam=False):
         node_data = self.grilladge.add_name(self.grill_coors)
         __list = [i for i in range(len(node_data))]
         for el in node_data[__list]:
@@ -69,6 +71,8 @@ class GrillModel(FEModel3D):
                 Iy=0.1, Iz=0.1, J=0.1, A=0.1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing bridge cantilevels in trans. direction"""
+        if self.no_of_beams == 1:
+            return self.Members
         _jj = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + no_of_beams 
         _number = int(self.discr * self.grilladge.span_data[0] + 1) # no of cantilevel FE on one side + 1
         _kk = (self.no_of_beams - 1) * (_number) + 1  # number of first node in last girder
@@ -94,6 +98,8 @@ class GrillModel(FEModel3D):
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False, deck=False):
         """adds FE members representing cross members or bridge deck in trans. dir."""
+        if self.no_of_beams == 1:
+            return self.Members
         _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
         _number = int(self.discr * self.grilladge.span_data[0])
         _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members + cantiENDs nodes
@@ -167,6 +173,8 @@ class GrillModel(FEModel3D):
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False, deck=False):
         """adds FE members representing cross members or bridge deck in trans. dir."""
+        if self.no_of_beams == 1:
+            return self.Members
         _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
         _number = int(self.discr * self.grilladge.span_data[0])
         _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members + cantiENDs nodes
