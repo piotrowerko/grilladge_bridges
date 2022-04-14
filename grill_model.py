@@ -24,13 +24,13 @@ class GrillModel(FEModel3D):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
-        self.grilladge = Grillage(no_of_beams, 
+        self.grillage = Grillage(no_of_beams, 
                                    beam_spacing, 
                                    span_data,
                                    canti_l,
                                    skew,
                                    onlybeam)
-        self.grill_coors = self.grilladge.grillage_nodes_c(discr, 
+        self.grill_coors = self.grillage.grillage_nodes_c(discr, 
                                                          tr_discr)
         self.discr = discr
         self.tr_discr = tr_discr
@@ -40,7 +40,7 @@ class GrillModel(FEModel3D):
         return f'{self.name}'
     
     def add_nodes(self, no_to_disp=1.0, onlybeam=False):
-        node_data = self.grilladge.add_name(self.grill_coors)
+        node_data = self.grillage.add_name(self.grill_coors)
         __list = [i for i in range(len(node_data))]
         for el in node_data[__list]:
             self.add_node(*el)
@@ -54,8 +54,8 @@ class GrillModel(FEModel3D):
                 Iy=1, Iz=1, J=1, A=1, auxNode=None,
                 tension_only=False, comp_only=False):
         """adds FE members representing bridge main deck girders"""
-        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
-        _number = int(self.discr * self.grilladge.span_data[0])
+        _number_tot = int(self.discr * self.grillage.span_data[0] * self.no_of_beams)
+        _number = int(self.discr * self.grillage.span_data[0])
         j = 0
         for i in range(0, _number_tot, 1):
             if i % _number == 0 and i > 0:
@@ -73,8 +73,8 @@ class GrillModel(FEModel3D):
         """adds FE members representing bridge cantilevers in trans. direction"""
         if self.no_of_beams == 1:
             return self.Members
-        _jj = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + no_of_beams 
-        _number = int(self.discr * self.grilladge.span_data[0] + 1) # no of cantilevel FE on one side + 1
+        _jj = int(self.discr * self.grillage.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + no_of_beams 
+        _number = int(self.discr * self.grillage.span_data[0] + 1) # no of cantilevel FE on one side + 1
         _kk = (self.no_of_beams - 1) * (_number) + 1  # number of first node in last girder
         for i in range(0, _number, 1):
             # adding cantilevel FE - bottom egde:
@@ -100,16 +100,16 @@ class GrillModel(FEModel3D):
         """adds FE members representing cross members or bridge deck in trans. dir."""
         if self.no_of_beams == 1:
             return self.Members
-        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
-        _number = int(self.discr * self.grilladge.span_data[0])
+        _number_tot = int(self.discr * self.grillage.span_data[0] * self.no_of_beams)
+        _number = int(self.discr * self.grillage.span_data[0])
         _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members + cantiENDs nodes
         
         # adding _loop variables for creation of additional trans. bars repr. deck in trans. dir.:
         if deck == True:
-            _first_loop = self.grilladge.span_data[0]  # eq. to number of spans
+            _first_loop = self.grillage.span_data[0]  # eq. to number of spans
             _sec_loop = int(self.discr) - 1  # eq. to number of cross lines of deck cross bars in each span
         else:
-            _first_loop = self.grilladge.span_data[0] + 1  # eq. to number of support cross members
+            _first_loop = self.grillage.span_data[0] + 1  # eq. to number of support cross members
             _sec_loop = 1
         
         for j in range(_first_loop):
@@ -175,17 +175,17 @@ class GrillModel(FEModel3D):
         """adds FE members representing cross members or bridge deck in trans. dir."""
         if self.no_of_beams == 1:
             return self.Members
-        _number_tot = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams)
-        _number = int(self.discr * self.grilladge.span_data[0])
+        _number_tot = int(self.discr * self.grillage.span_data[0] * self.no_of_beams)
+        _number = int(self.discr * self.grillage.span_data[0])
         _pp = _number_tot + self.no_of_beams + 2 * _number + 2  # number of nodes in longitudinal members + cantiENDs nodes
         _qq = (_number + 1) * (self.tr_discr - 1)# liczba węzłów wewnętrznych pomiędzy belkami
         
         # adding _loop variables for creation of additional trans. bars repr. deck in trans. dir.:
         if deck == True:
-            _first_loop = self.grilladge.span_data[0]  # eq. to number of spans
+            _first_loop = self.grillage.span_data[0]  # eq. to number of spans
             _sec_loop = int(self.discr) - 1  # eq. to number of cross lines of deck cross bars in each span
         else:
-            _first_loop = self.grilladge.span_data[0] + 1  # eq. to number of support cross members
+            _first_loop = self.grillage.span_data[0] + 1  # eq. to number of support cross members
             _sec_loop = 1
         
         for a in range(0, self.no_of_beams - 1, 1):
@@ -248,17 +248,17 @@ class GrillModel(FEModel3D):
 
     def add_gird_suppports(self):
         """adds node supports at intersections of girder and support axes"""
-        int(self.discr) #* self.grilladge.span_data[0])
+        int(self.discr) #* self.grillage.span_data[0])
         #'1 3 5 6 8 10'
         # compute number of intersections:
-        num_of_in = self.no_of_beams * (self.grilladge.span_data[0] + 1)
+        num_of_in = self.no_of_beams * (self.grillage.span_data[0] + 1)
         sup_node_number = 1.0
         j = 0
         for i in range(num_of_in):
             self.def_support(sup_node_number, 
                              *(3 * [True]), 
                              *(3 * [False]))
-            if (j) < self.grilladge.span_data[0]:
+            if (j) < self.grillage.span_data[0]:
                 sup_node_number += self.discr
                 j += 1
             else:
