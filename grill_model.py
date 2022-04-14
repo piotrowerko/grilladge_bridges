@@ -1,6 +1,6 @@
 import numpy as np
 from PyNite.FEModel3D import FEModel3D
-from grilladge import Grilladge
+from grillage import Grillage
 from PyNite import Visualization
 
 from mpl_toolkits.mplot3d import Axes3D
@@ -9,8 +9,8 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 class GrillModel(FEModel3D):
-    """Instance of this class is a Grilladge FE model,
-    build on basis of instance of Grilladge class instance from grilladge module"""
+    """Instance of this class is a Grillage FE model,
+    build on basis of instance of Grillage class instance from grillage module"""
     def __init__(self,
                  name, 
                  no_of_beams=2, 
@@ -24,13 +24,13 @@ class GrillModel(FEModel3D):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA
         super().__init__()
         self.name = name
-        self.grilladge = Grilladge(no_of_beams, 
+        self.grilladge = Grillage(no_of_beams, 
                                    beam_spacing, 
                                    span_data,
                                    canti_l,
                                    skew,
                                    onlybeam)
-        self.grill_coors = self.grilladge.grilladge_nodes_c(discr, 
+        self.grill_coors = self.grilladge.grillage_nodes_c(discr, 
                                                          tr_discr)
         self.discr = discr
         self.tr_discr = tr_discr
@@ -70,7 +70,7 @@ class GrillModel(FEModel3D):
     def add_deck_trans_can(self, E=35000000, G=16000000, 
                 Iy=0.1, Iz=0.1, J=0.1, A=0.1, auxNode=None,
                 tension_only=False, comp_only=False):
-        """adds FE members representing bridge cantilevels in trans. direction"""
+        """adds FE members representing bridge cantilevers in trans. direction"""
         if self.no_of_beams == 1:
             return self.Members
         _jj = int(self.discr * self.grilladge.span_data[0] * self.no_of_beams + self.no_of_beams)  # _no_of_main_gird_fe + no_of_beams 
@@ -247,7 +247,7 @@ class GrillModel(FEModel3D):
         return _last_mem_no, _pp
 
     def add_gird_suppports(self):
-        """adds node supperts at intersections of girder and support axes"""
+        """adds node supports at intersections of girder and support axes"""
         int(self.discr) #* self.grilladge.span_data[0])
         #'1 3 5 6 8 10'
         # compute number of intersections:
@@ -277,7 +277,7 @@ class GrillModel(FEModel3D):
                 node_disp_vert = np.append(node_disp_vert, [self.Nodes[key].DY['Combo 1']])
         return node_disp_vert
 
-    def _load_with_unit_load(self, node):
+    def _load_with_unit_load(self):
         "adds unit loads and and creates factors dictionary"
         _factors = {}
         for key in self.Nodes.keys():
@@ -290,26 +290,40 @@ class GrillModel(FEModel3D):
         return _factors
                 
     
-    def aggregate_displacements(self, node):
-        "computes data for influance map in given node"
-        node_disp_vert = {}
-        _factors = self._load_with_unit_load(node)
-        for key in self.Nodes.keys():
-            if key == None:
-                pass
-            else:
-                self.add_load_combo(key, factors={key:1.0})
-        self.analyze(check_statics=False)
-        #node_disp_vert = np.append(node_disp_vert, [self.Nodes[key].DY['inf_data']])
-        for key in self.Nodes.keys():
-            if key == None:
-                pass
-            else:
-                node_disp_vert[key] = self.Nodes[node].DY[key]
-        return node_disp_vert
+    def create_influence_data(self, node=None, member=None):
+        "computes data for influence map in given node or member"
+            
+        if node or member:
+            _factors = self._load_with_unit_load()
+            for key in self.Nodes.keys():
+                if key == None:
+                    pass
+                else:
+                    self.add_load_combo(key, factors={key:1.0})  # creates numerous load combos, each with only one factor = 1.0
+                    # number of compos is equal to number of nodes
+            self.analyze(check_statics=False)
+            #node_disp_vert = np.append(node_disp_vert, [self.Nodes[key].DY['inf_data']])
+        else: pass
+        if node and member == None:
+            node_disp_vert = {}
+            for key in self.Nodes.keys():
+                if key == None:
+                    pass
+                else:
+                    node_disp_vert[key] = self.Nodes[node].DY[key]
+            return node_disp_vert
+        elif member and node == None:
+            memb_bend_moment = {}
+            for key in self.Nodes.keys():
+                if key == None:
+                    pass
+                else:
+                    memb_bend_moment[key] = self.Members[member].moment('Mz', 0.01, key)
+            return memb_bend_moment
+        else: pass
     
     def gen_np_data_for_plot(self, node_data, analysed_data):
-        """returns np array of influance 3d function discrete representation
+        """returns np array of influence 3d function discrete representation
         for visaulisations"""
         _infl_data = node_data
         _vals = np.array([val for val in analysed_data.values()])
@@ -318,7 +332,7 @@ class GrillModel(FEModel3D):
         return infl_data
 
     def print_3d_plot(self, data):
-        """plots influance scatter plot of given data"""
+        """plots influence scatter plot of given data"""
         longi_cor = data[:, 3]  # "z" in pynite; "x" in arsap
         trans_cor = data[:, 1]  # "x" in pynite; "y" in arsap
         infl_data = data[:, 4]
@@ -404,11 +418,12 @@ def main():
     
     # print(wd185.Nodes[1.0].Name)
     
-    node = 5.0
-    wd185._load_with_unit_load(node)
-    displ_data = wd185.aggregate_displacements(node)
-    data = wd185.gen_np_data_for_plot(node_data, displ_data)
+    member = 6.0
+    #wd185._load_with_unit_load(node)
+    comp_data = wd185.create_influence_data(member=member)  # choosing Mz influence map
+    # one can choose node=node and to create the displacement influence map
+    data = wd185.gen_np_data_for_plot(node_data, comp_data)
     wd185.print_3d_plot(data)
-            
+
 if __name__ == '__main__':
     main()

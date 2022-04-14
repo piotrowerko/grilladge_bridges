@@ -3,7 +3,7 @@ import math
 
 
 
-class Grilladge():
+class Grillage():
     def __init__(self, no_of_beams=2, beam_spacing=8, span_data=(2, 28, 28), canti_l=2.5, skew=90, onlybeam=False): 
 
         self.no_of_beams = no_of_beams
@@ -215,7 +215,7 @@ class Grilladge():
             all_nodes_coor_cr = np.stack((z_coors_cr, x_coors_cr, y_coors_cr))
             return all_nodes_coor_g, all_nodes_coor_c, all_nodes_coor_cr
 
-    def grilladge_nodes_c(self, discr=2, tr_discr=3, coors_like_pynite='y'):
+    def grillage_nodes_c(self, discr=2, tr_discr=3, coors_like_pynite='y'):
         """returns nodes coors of grilladge"""
         grill_nodes_coor_ = self._nodes_coor(discr, tr_discr)
         if self.onlybeam:

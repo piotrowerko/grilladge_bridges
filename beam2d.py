@@ -1,7 +1,7 @@
 from PyNite import Visualization
 
 from PyNite.FEModel3D import FEModel3D
-from grilladge import Grilladge
+from grillage import Grilladge
 from grill_model import GrillModel
 
 
