@@ -1,4 +1,4 @@
-<h3>Python module for FE grilladge bridge models</h3>
+<h3>Python module for FE grillage bridge models</h3>
 
 Initial version (e.g. typos may appear)
 

@@ -1,7 +1,7 @@
 from PyNite import Visualization
 
 from PyNite.FEModel3D import FEModel3D
-from grillage import Grilladge
+from grillage import Grillage
 from grill_model import GrillModel
 
 
@@ -34,7 +34,7 @@ def main():
     my_beam2d.analyze(check_statics=True)
     
     # Render the deformed shape
-    #Visualization.render_model(my_beam2d, annotation_size=0.05, deformed_shape=True, deformed_scale=300, render_loads=True)
+    Visualization.render_model(my_beam2d, annotation_size=0.05, deformed_shape=True, deformed_scale=300, render_loads=True)
 
     # print('N1 displacement in Y =', my_beam2d.Nodes[2.0].DY)
     

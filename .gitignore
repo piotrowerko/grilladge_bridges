@@ -124,6 +124,7 @@ venv_signal_aspekt/
 virt_env_pio1/
 pynite_venv1/
 gril_br_venv/
+gril_br_venv2/
 
 # Spyder project settings
 .spyderproject

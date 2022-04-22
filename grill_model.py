@@ -60,8 +60,8 @@ class GrillModel(FEModel3D):
         for i in range(0, _number_tot, 1):
             if i % _number == 0 and i > 0:
                 j += 1
-            self.add_member((i+1), self.Nodes[(j+i+1)*1.0].Name, 
-                            self.Nodes[((j+i+2)*1.0)].Name, E, G, Iy, Iz, J, A, 
+            self.add_member((i+1), self.Nodes[(j+i+1)*1.0].name, 
+                            self.Nodes[((j+i+2)*1.0)].name, E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
                             comp_only=False)
@@ -78,15 +78,15 @@ class GrillModel(FEModel3D):
         _kk = (self.no_of_beams - 1) * (_number) + 1  # number of first node in last girder
         for i in range(0, _number, 1):
             # adding cantilevel FE - bottom egde:
-            self.add_member((_jj+i-1), self.Nodes[(i+1)*1.0].Name, 
-                            self.Nodes[((_jj+i+1)*1.0)].Name, 
+            self.add_member((_jj+i-1), self.Nodes[(i+1)*1.0].name, 
+                            self.Nodes[((_jj+i+1)*1.0)].name, 
                             E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
                             comp_only=False)
             # adding cantilevel FE - upper egde:
-            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].Name, 
-                            self.Nodes[((_jj+_number+1+i)*1.0)].Name, 
+            self.add_member((_jj-1+_number+i), self.Nodes[(_kk+i)*1.0].name, 
+                            self.Nodes[((_jj+_number+1+i)*1.0)].name, 
                             E, G, Iy, Iz, J, A, 
                             auxNode=None,
                             tension_only=False, 
@@ -116,15 +116,15 @@ class GrillModel(FEModel3D):
             for k in range(_sec_loop):
                 _last_mem_no = list(self.Members.keys())[-1]
                 if deck == True:
-                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 2 + k].Name, 
-                                        self.Nodes[j * self.discr + _pp + 2 + k].Name, 
+                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 2 + k].name, 
+                                        self.Nodes[j * self.discr + _pp + 2 + k].name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
                                         comp_only=False)
                 else:
-                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].Name, 
-                                        self.Nodes[j * self.discr + _pp + 1].Name, 
+                    self.add_member((_last_mem_no+1), self.Nodes[j * self.discr + 1].name, 
+                                        self.Nodes[j * self.discr + _pp + 1].name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
@@ -135,16 +135,16 @@ class GrillModel(FEModel3D):
                         if i == 0:
                             _last_mem_no = list(self.Members.keys())[-1]
                         self.add_member((i+_last_mem_no+1), 
-                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + 2 + k].Name, 
-                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 3 + k].Name, 
+                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + 2 + k].name, 
+                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 3 + k].name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
                                         comp_only=False)
                     else:
                         self.add_member((i+_last_mem_no+2), 
-                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].Name, 
-                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
+                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + 1].name, 
+                                        self.Nodes[j * self.discr + (_number + 1) * i + _pp + _number + 2].name, 
                                         E, G, Iy, Iz, J, A, 
                                         auxNode=None,
                                         tension_only=False, 
@@ -152,17 +152,17 @@ class GrillModel(FEModel3D):
 
 
                 _last_mem_no = list(self.Members.keys())[-1]
-                _curr_node = self.Members[_last_mem_no].j_node.Name
+                _curr_node = self.Members[_last_mem_no].j_node.name
                 if deck == True:
                     self.add_member((_last_mem_no+1), _curr_node, 
-                                    self.Nodes[j * self.discr + _number + 3 + k].Name, 
+                                    self.Nodes[j * self.discr + _number + 3 + k].name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
                                 comp_only=False)
                 else:
                     self.add_member((_last_mem_no+1), _curr_node, 
-                                    self.Nodes[j * self.discr + _number + 2].Name, 
+                                    self.Nodes[j * self.discr + _number + 2].name, 
                                 E, G, Iy, Iz, J, A, 
                                 auxNode=None,
                                 tension_only=False, 
@@ -193,15 +193,15 @@ class GrillModel(FEModel3D):
                 for k in range(_sec_loop):
                     _last_mem_no = list(self.Members.keys())[-1]
                     if deck == True:
-                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 2 + k].Name, 
-                                            self.Nodes[a * _qq + j * self.discr + _pp + 2 + k].Name, 
+                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 2 + k].name, 
+                                            self.Nodes[a * _qq + j * self.discr + _pp + 2 + k].name, 
                                             E, G, Iy, Iz, J, A, 
                                             auxNode=None,
                                             tension_only=False, 
                                             comp_only=False)
                     else:
-                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 1].Name, 
-                                            self.Nodes[a * _qq + j * self.discr + _pp + 1].Name, 
+                        self.add_member((_last_mem_no+1), self.Nodes[a * (_number + 1) + j * self.discr + 1].name, 
+                                            self.Nodes[a * _qq + j * self.discr + _pp + 1].name, 
                                             E, G, Iy, Iz, J, A, 
                                             auxNode=None,
                                             tension_only=False, 
@@ -212,16 +212,16 @@ class GrillModel(FEModel3D):
                             if i == 0:
                                 _last_mem_no = list(self.Members.keys())[-1]
                             self.add_member((i+_last_mem_no+1), 
-                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 2 + k].Name, 
-                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 3 + k].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 2 + k].name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 3 + k].name, 
                                             E, G, Iy, Iz, J, A, 
                                             auxNode=None,
                                             tension_only=False, 
                                             comp_only=False)
                         else:
                             self.add_member((i+_last_mem_no+2), 
-                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 1].Name, 
-                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 2].Name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + 1].name, 
+                                            self.Nodes[a * _qq + j * self.discr + (_number + 1) * i + _pp + _number + 2].name, 
                                             E, G, Iy, Iz, J, A, 
                                             auxNode=None,
                                             tension_only=False, 
@@ -229,17 +229,17 @@ class GrillModel(FEModel3D):
 
 
                     _last_mem_no = list(self.Members.keys())[-1]
-                    _curr_node = self.Members[_last_mem_no].j_node.Name
+                    _curr_node = self.Members[_last_mem_no].j_node.name
                     if deck == True:
                         self.add_member((_last_mem_no+1), _curr_node, 
-                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 3 + k].Name, 
+                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 3 + k].name, 
                                     E, G, Iy, Iz, J, A, 
                                     auxNode=None,
                                     tension_only=False, 
                                     comp_only=False)
                     else:
                         self.add_member((_last_mem_no+1), _curr_node, 
-                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 2].Name, 
+                                        self.Nodes[a * (_number + 1) + j * self.discr + _number + 2].name, 
                                     E, G, Iy, Iz, J, A, 
                                     auxNode=None,
                                     tension_only=False, 

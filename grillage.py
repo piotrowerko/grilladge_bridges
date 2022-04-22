@@ -216,7 +216,7 @@ class Grillage():
             return all_nodes_coor_g, all_nodes_coor_c, all_nodes_coor_cr
 
     def grillage_nodes_c(self, discr=2, tr_discr=3, coors_like_pynite='y'):
-        """returns nodes coors of grilladge"""
+        """returns nodes coors of grillage"""
         grill_nodes_coor_ = self._nodes_coor(discr, tr_discr)
         if self.onlybeam:
             grill_nodes_coor = np.transpose(grill_nodes_coor_)
@@ -247,8 +247,8 @@ class Grillage():
 
 
 def main():
-    wd185 = Grilladge(no_of_beams=3, beam_spacing=8, span_data=(2, 30, 30), skew=90)
-    ppp = wd185.grilladge_nodes_c(discr=2, tr_discr=2, coors_like_pynite='y')
+    wd185 = Grillage(no_of_beams=3, beam_spacing=8, span_data=(2, 30, 30), skew=90)
+    ppp = wd185.grillage_nodes_c(discr=2, tr_discr=2, coors_like_pynite='y')
     print(wd185.add_name(ppp))
     
 if __name__ == '__main__':
