@@ -3,14 +3,15 @@ import math
 
 
 
-class Grilladge():
-    def __init__(self, no_of_beams=2, beam_spacing=8, span_data=(2, 28, 28), canti_l=2.5, skew=90): 
+class Grillage():
+    def __init__(self, no_of_beams=2, beam_spacing=8, span_data=(2, 28, 28), canti_l=2.5, skew=90, onlybeam=False): 
 
         self.no_of_beams = no_of_beams
         self.beam_spacing = beam_spacing
         self.span_data = span_data
         self.skew = skew
         self.canti_l = canti_l
+        self.onlybeam = onlybeam
  
     def _z_coors_in_g1(self, discr=20):
         """returns numpy array of z coordinates in first girder"""
@@ -65,7 +66,7 @@ class Grilladge():
         """returns numpy array of z cooridnates of lingitudal arbitrary line (z-line) governing nodes"""
         if isinstance(discr, int) == False:
             raise TypeError(f"discr must be an integer!")
-        if isinstance(x_dist, float) == False and isinstance(x_dist, int) == False:
+        if isinstance(x_dist, float) == False and isinstance(x_dist, int) == False and isinstance(discr, int) == False:
             raise TypeError(f"x_dist must be a float or integer!")
         if self.skew == 90 or x_dist == 0.0:
             _z_coors_cross_m = self._z_coors_in_g1(discr)
@@ -90,7 +91,7 @@ class Grilladge():
         """returns numpy array of x cooridnates of lingitudal arbitrary line (z-line) governing nodes"""
         if isinstance(discr, int) == False:
             raise TypeError(f"discr must be an integer!")
-        if isinstance(x_dist, float) == False and isinstance(x_dist, int) == False:
+        if isinstance(x_dist, float) == False and isinstance(x_dist, int) == False and isinstance(discr, int) == False:
             raise TypeError(f"x_dist must be a float or integer!")
         x_coors_cross_m = self._x_coors_in_g1(discr) + x_dist
         return np.round(x_coors_cross_m, decimals=3)
@@ -196,28 +197,35 @@ class Grilladge():
         z_coors_g, x_coors_g, y_coors_g = self._gen_coor_array(discr, x_dist_arr_g)
         all_nodes_coor_g = np.stack((z_coors_g, x_coors_g, y_coors_g))
         
-        #  generating cantilevel nodes coordinates:
-        x_dist_arr_c = np.array([- self.canti_l, self.canti_l + (self.no_of_beams-1) * self.beam_spacing])
-        z_coors_c, x_coors_c, y_coors_c = self._gen_coor_array(discr, x_dist_arr_c)
-        all_nodes_coor_c = np.stack((z_coors_c, x_coors_c, y_coors_c))
         
-        #  generating cross member nodes coordinates:
-        x_dist_arr_cr = np.array([])
-        for i in range(self.no_of_beams-1):
-            for j in range(tr_discr-1):
-                x_dist_arr_cr = np.append(x_dist_arr_cr, [(j+1) * self.beam_spacing / tr_discr])
-        z_coors_cr, x_coors_cr, y_coors_cr = self._gen_coor_array(discr, x_dist_arr_cr)
-        all_nodes_coor_cr = np.stack((z_coors_cr, x_coors_cr, y_coors_cr))
-        return all_nodes_coor_g, all_nodes_coor_c, all_nodes_coor_cr
+        if self.onlybeam:
+            return all_nodes_coor_g
+        else:
+            #  generating cantilevel nodes coordinates:
+            x_dist_arr_c = np.array([- self.canti_l, self.canti_l + (self.no_of_beams-1) * self.beam_spacing])
+            z_coors_c, x_coors_c, y_coors_c = self._gen_coor_array(discr, x_dist_arr_c)
+            all_nodes_coor_c = np.stack((z_coors_c, x_coors_c, y_coors_c))
+            
+            #  generating cross member nodes coordinates:
+            x_dist_arr_cr = np.array([])
+            for i in range(self.no_of_beams-1):
+                for j in range(tr_discr-1):
+                    x_dist_arr_cr = np.append(x_dist_arr_cr, [(j+1) * self.beam_spacing / tr_discr + i * self.beam_spacing]) #
+            z_coors_cr, x_coors_cr, y_coors_cr = self._gen_coor_array(discr, x_dist_arr_cr)
+            all_nodes_coor_cr = np.stack((z_coors_cr, x_coors_cr, y_coors_cr))
+            return all_nodes_coor_g, all_nodes_coor_c, all_nodes_coor_cr
 
-    def grilladge_nodes_c(self, discr=2, tr_discr=3, coors_like_pynite='y'):
-        """returns nodes coors of grilladge"""
+    def grillage_nodes_c(self, discr=2, tr_discr=3, coors_like_pynite='y'):
+        """returns nodes coors of grillage"""
         grill_nodes_coor_ = self._nodes_coor(discr, tr_discr)
-        for i, el in enumerate(grill_nodes_coor_):
-            if i == 0:
-                grill_nodes_coor = np.transpose(el)
-            else:
-                grill_nodes_coor = np.vstack((grill_nodes_coor, np.transpose(el)))
+        if self.onlybeam:
+            grill_nodes_coor = np.transpose(grill_nodes_coor_)
+        else:
+            for i, el in enumerate(grill_nodes_coor_):
+                if i == 0:
+                    grill_nodes_coor = np.transpose(el)
+                else:
+                    grill_nodes_coor = np.vstack((grill_nodes_coor, np.transpose(el)))
         if coors_like_pynite == 'y':
             return self._europe_to_pynite_coors(grill_nodes_coor)
         else:
@@ -239,8 +247,8 @@ class Grilladge():
 
 
 def main():
-    wd185 = Grilladge(no_of_beams=2, beam_spacing=8, span_data=(2, 35, 30), skew=90)
-    ppp = wd185.grilladge_nodes_c(discr=2, tr_discr=3, coors_like_pynite='y')
+    wd185 = Grillage(no_of_beams=3, beam_spacing=8, span_data=(2, 30, 30), skew=90)
+    ppp = wd185.grillage_nodes_c(discr=2, tr_discr=2, coors_like_pynite='y')
     print(wd185.add_name(ppp))
     
 if __name__ == '__main__':
