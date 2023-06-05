@@ -9,7 +9,7 @@ def main():
     my_beam2d = GrillModel('moja belka 2d',
                             no_of_beams=1, 
                             beam_spacing=0, 
-                            span_data=(1, 10.01),
+                            span_data=(1, 10.001),
                             canti_l=0,
                             skew=0,
                             discr=10,

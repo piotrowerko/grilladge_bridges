@@ -14,11 +14,11 @@ class GrillModel(FEModel3D):
     def __init__(self,
                  name, 
                  no_of_beams=2, 
-                 beam_spacing=4, 
-                 span_data=(2, 30, 30),
-                 canti_l=2.5,
-                 skew=60,
-                 discr=10,
+                 beam_spacing=5, 
+                 span_data=(2, 25, 25),
+                 canti_l=3.5,
+                 skew=70,
+                 discr=20,
                  tr_discr=3,
                  onlybeam=False):
         #  https://www.youtube.com/watch?v=MBbVq_FIYDA

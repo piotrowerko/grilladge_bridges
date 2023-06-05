@@ -247,7 +247,7 @@ class Grillage():
 
 
 def main():
-    wd185 = Grillage(no_of_beams=3, beam_spacing=8, span_data=(2, 30, 30), skew=90)
+    wd185 = Grillage(no_of_beams=2, beam_spacing=5, span_data=(2, 20, 20), skew=70)
     ppp = wd185.grillage_nodes_c(discr=2, tr_discr=2, coors_like_pynite='y')
     print(wd185.add_name(ppp))
     
